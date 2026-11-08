@@ -2,54 +2,69 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Office Tools Pro</title>
+  <title>Admin - Tool Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-  <div class="max-w-4xl mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Admin Dashboard</h1>
-      <a href="/logout" class="text-gray-600">Logout</a>
-    </div>
+  <nav class="bg-white shadow p-4 flex justify-between">
+    <h1 class="text-xl font-bold">Tool Management</h1>
+    <a href="/logout" class="text-gray-600">Logout</a>
+  </nav>
 
-    <div class="bg-white rounded shadow p-6 mb-8">
-      <h2 class="text-lg font-semibold mb-4">Upload New Tool</h2>
-      <form method="POST" action="/admin/upload" enctype="multipart/form-data">
-        <div class="mb-3">
-          <label class="block text-sm">Tool Name</label>
-          <input type="text" name="name" required class="w-full border p-2 rounded">
-        </div>
-        <div class="mb-3">
-          <label class="block text-sm">Description</label>
-          <textarea name="description" class="w-full border p-2 rounded" rows="3"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="block text-sm">Version</label>
-          <input type="text" name="version" value="1.0" class="w-full border p-2 rounded">
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm">File</label>
-          <input type="file" name="file" required class="w-full">
-        </div>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Upload Tool</button>
-      </form>
-    </div>
+  <div class="max-w-4xl mx-auto mt-8 p-6 bg-white rounded shadow">
+    <h2 class="text-2xl font-bold mb-6">Add New Tool</h2>
+    <form action="/admin/add-tool" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium">Name</label>
+        <input type="text" name="name" required class="w-full border rounded p-2">
+      </div>
+      <div>
+        <label class="block text-sm font-medium">Description</label>
+        <textarea name="description" class="w-full border rounded p-2" rows="2"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium">Type</label>
+        <select name="type" class="w-full border rounded p-2">
+          <option value="online">Online Tool</option>
+          <option value="download">Download Tool</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium">URL (for online tools)</label>
+        <input type="text" name="url" placeholder="/pdf-tool" class="w-full border rounded p-2">
+      </div>
+      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+        Add Tool
+      </button>
+    </form>
+  </div>
 
-    <h2 class="text-lg font-semibold mb-4">Existing Tools</h2>
-    <div class="space-y-3">
-      <% tools.forEach(tool => { %>
-        <div class="bg-white p-4 rounded shadow flex justify-between items-center">
-          <div>
-            <strong><%= tool.name %></strong> (v<%= tool.version %>)<br>
-            <span class="text-sm text-gray-500"><%= tool.filename %></span>
-          </div>
-          <form method="POST" action="/admin/delete/<%= tool.id %>" onsubmit="return confirm('Delete this tool?')">
-            <button type="submit" class="text-red-600 text-sm">Delete</button>
-          </form>
-        </div>
-      <% }) %>
-      <% if (tools.length === 0) { %><p>No tools yet.</p><% } %>
-    </div>
+  <div class="max-w-4xl mx-auto mt-8 p-6 bg-white rounded shadow">
+    <h2 class="text-2xl font-bold mb-6">Existing Tools</h2>
+    <table class="w-full">
+      <thead>
+        <tr class="border-b">
+          <th class="text-left py-2">Name</th>
+          <th class="text-left py-2">Type</th>
+          <th class="text-left py-2">URL</th>
+          <th class="text-left py-2">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% tools.forEach(tool => { %>
+          <tr class="border-b">
+            <td class="py-2"><%= tool.name %></td>
+            <td class="py-2"><%= tool.type || 'download' %></td>
+            <td class="py-2"><%= tool.url || '-' %></td>
+            <td class="py-2">
+              <form action="/admin/delete/<%= tool.id %>" method="POST" class="inline">
+                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Delete this tool?')">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
   </div>
 </body>
 </html>
