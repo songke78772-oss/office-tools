@@ -8,6 +8,7 @@ const multer = require('multer');
 const Stripe = require('stripe');
 const Database = require('better-sqlite3');
 const http = require('http');
+const { exec } = require('child_process');
 
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -256,25 +257,41 @@ app.post('/admin/delete/:id', (req, res) => {
   res.redirect('/admin/dashboard');
 });
 
-// PDF 翻译工具代理（仅登录用户可访问）
-app.use('/pdf-translate', (req, res, next) => {
-  if (!req.session.userId) {
-    return res.redirect('/login');
-  }
-  next();
-}, (req, res) => {
-  const options = {
-    hostname: '127.0.0.1',
-    port: 7860,
-    path: req.url,
-    method: req.method,
-    headers: req.headers
-  };
-  const proxy = http.request(options, (proxyRes) => {
-    res.writeHead(proxyRes.statusCode, proxyRes.headers);
-    proxyRes.pipe(res);
+// PDF 翻译页面（需登录）
+app.get('/pdf-tool', requireLogin, (req, res) => {
+  res.render('pdf-tool');
+});
+
+// PDF 翻译 API（需登录）
+app.post('/api/pdf-translate', requireLogin, upload.single('file'), (req, res) => {
+  if (!req.file) return res.json({ success: false, error: 'No file uploaded' });
+
+  const { type, from, to } = req.body;
+  const inputPath = req.file.path;
+  const outputDir = path.join(__dirname, 'uploads', 'translated');
+  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+
+  const cmd = `docker exec pdf2zh pdf2zh "/app/${path.basename(inputPath)}" -li ${from} -lo ${to} -s google`;
+  
+  exec(cmd, { timeout: 300000 }, (error, stdout, stderr) => {
+    if (error) {
+      console.error(stderr || error);
+      return res.json({ success: false, error: 'Translation failed' });
+    }
+    const baseName = path.basename(inputPath, path.extname(inputPath));
+    const resultName = type === 'mono' ? baseName + '-mono.pdf' : baseName + '-dual.pdf';
+    res.json({ 
+      success: true, 
+      downloadUrl: '/download-translated/' + resultName
+    });
   });
-  req.pipe(proxy);
+});
+
+// 下载翻译后的文件
+app.get('/download-translated/:filename', requireLogin, (req, res) => {
+  const filePath = path.join(__dirname, 'uploads', 'translated', req.params.filename);
+  if (!fs.existsSync(filePath)) return res.status(404).send('File not found');
+  res.download(filePath);
 });
 
 // Start server
