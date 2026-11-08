@@ -7,6 +7,7 @@ const fs = require('fs');
 const multer = require('multer');
 const Stripe = require('stripe');
 const Database = require('better-sqlite3');
+const http = require('http');
 
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -40,7 +41,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'fallback-secret-change-me',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 } // 7 days
+  cookie: { secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 }
 }));
 
 app.use(express.urlencoded({ extended: true }));
@@ -57,7 +58,7 @@ const storage = multer.diskStorage({
     cb(null, unique + '-' + file.originalname);
   }
 });
-const upload = multer({ storage, limits: { fileSize: 100 * 1024 * 1024 } }); // 100MB
+const upload = multer({ storage, limits: { fileSize: 100 * 1024 * 1024 } });
 
 // Middleware: require login
 function requireLogin(req, res, next) {
@@ -208,7 +209,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
   if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
     const sub = event.data.object;
     const status = sub.status === 'active' ? 'active' : 'inactive';
-    // Find user by subscription id or customer
     db.prepare('UPDATE users SET subscription_status = ? WHERE subscription_id = ?')
       .run(status, sub.id);
   }
@@ -216,7 +216,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
   res.json({ received: true });
 });
 
-// Admin routes (simple password protect)
+// Admin routes
 app.get('/admin', (req, res) => {
   if (req.session.isAdmin) return res.redirect('/admin/dashboard');
   res.render('admin-login', { error: null });
@@ -254,6 +254,27 @@ app.post('/admin/delete/:id', (req, res) => {
     db.prepare('DELETE FROM tools WHERE id = ?').run(req.params.id);
   }
   res.redirect('/admin/dashboard');
+});
+
+// PDF 翻译工具代理（仅登录用户可访问）
+app.use('/pdf-translate', (req, res, next) => {
+  if (!req.session.userId) {
+    return res.redirect('/login');
+  }
+  next();
+}, (req, res) => {
+  const options = {
+    hostname: '127.0.0.1',
+    port: 7860,
+    path: req.url,
+    method: req.method,
+    headers: req.headers
+  };
+  const proxy = http.request(options, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res);
+  });
+  req.pipe(proxy);
 });
 
 // Start server
