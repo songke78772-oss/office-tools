@@ -7,7 +7,6 @@ const fs = require('fs');
 const multer = require('multer');
 const Stripe = require('stripe');
 const Database = require('better-sqlite3');
-const http = require('http');
 const { exec } = require('child_process');
 
 const app = express();
@@ -32,6 +31,8 @@ db.exec(`
     description TEXT,
     filename TEXT NOT NULL,
     version TEXT DEFAULT '1.0',
+    type TEXT DEFAULT 'download',
+    url TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
@@ -237,12 +238,22 @@ app.get('/admin/dashboard', (req, res) => {
   res.render('admin', { tools });
 });
 
+// Add tool (online or download)
+app.post('/admin/add-tool', (req, res) => {
+  if (!req.session.isAdmin) return res.status(403).send('Forbidden');
+  const { name, description, type, url } = req.body;
+  if (!name) return res.redirect('/admin/dashboard');
+  db.prepare('INSERT INTO tools (name, description, filename, type, url) VALUES (?, ?, ?, ?, ?)')
+    .run(name, description || '', '', type || 'online', url || '');
+  res.redirect('/admin/dashboard');
+});
+
 app.post('/admin/upload', upload.single('file'), (req, res) => {
   if (!req.session.isAdmin) return res.status(403).send('Forbidden');
   const { name, description, version } = req.body;
   if (!req.file || !name) return res.redirect('/admin/dashboard?error=missing');
-  db.prepare('INSERT INTO tools (name, description, filename, version) VALUES (?, ?, ?, ?)')
-    .run(name, description || '', req.file.filename, version || '1.0');
+  db.prepare('INSERT INTO tools (name, description, filename, version, type) VALUES (?, ?, ?, ?, ?)')
+    .run(name, description || '', req.file.filename, version || '1.0', 'download');
   res.redirect('/admin/dashboard');
 });
 
@@ -250,8 +261,10 @@ app.post('/admin/delete/:id', (req, res) => {
   if (!req.session.isAdmin) return res.status(403).send('Forbidden');
   const tool = db.prepare('SELECT * FROM tools WHERE id = ?').get(req.params.id);
   if (tool) {
-    const filePath = path.join(__dirname, 'uploads', tool.filename);
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    if (tool.filename) {
+      const filePath = path.join(__dirname, 'uploads', tool.filename);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    }
     db.prepare('DELETE FROM tools WHERE id = ?').run(req.params.id);
   }
   res.redirect('/admin/dashboard');
