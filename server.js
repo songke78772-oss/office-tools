@@ -80,10 +80,10 @@ function requireSubscription(req, res, next) {
 
 // Home
 app.get('/', (req, res) => {
-  const toolsCount = db.prepare('SELECT COUNT(*) as c FROM tools').get().c;
+  const tools = db.prepare("SELECT * FROM tools").all();
   res.render('index', { 
     loggedIn: !!req.session.userId,
-    toolsCount,
+    tools,
     price: '1.99'
   });
 });
