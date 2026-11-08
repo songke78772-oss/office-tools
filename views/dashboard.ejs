@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Office Tools Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">Office Tools Pro</h1>
+      <div>
+        <span class="text-gray-600 mr-4"><%= user.email %></span>
+        <a href="/logout" class="text-gray-600">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <% if (needSub) { %>
+      <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 p-4 rounded mb-6">
+        You need an active subscription to download tools.
+      </div>
+    <% } %>
+
+    <div class="bg-white rounded-xl shadow p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-2">Subscription Status</h2>
+      <p class="mb-4">
+        Status: 
+        <span class="font-bold <%= user.subscription_status === 'active' ? 'text-green-600' : 'text-red-600' %>">
+          <%= user.subscription_status === 'active' ? 'Active' : 'Inactive' %>
+        </span>
+      </p>
+      <% if (user.subscription_status !== 'active') { %>
+        <button id="subscribeBtn" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+          Subscribe for $1.99/month
+        </button>
+      <% } else { %>
+        <p class="text-green-700">Thank you! You have full access to all tools.</p>
+        <p class="text-sm text-gray-500 mt-2">You can manage your subscription in the Stripe customer portal (link coming soon or via email).</p>
+      <% } %>
+    </div>
+
+    <h2 class="text-2xl font-bold mb-4">Available Tools</h2>
+    <% if (tools.length === 0) { %>
+      <p class="text-gray-500">No tools uploaded yet. Check back soon!</p>
+    <% } else { %>
+      <div class="grid gap-4">
+        <% tools.forEach(tool => { %>
+          <div class="bg-white rounded-lg shadow p-5 flex justify-between items-center">
+            <div>
+              <h3 class="font-semibold text-lg"><%= tool.name %></h3>
+              <p class="text-gray-600 text-sm"><%= tool.description || 'No description' %></p>
+              <p class="text-xs text-gray-400 mt-1">Version <%= tool.version %> · Updated <%= new Date(tool.updated_at).toLocaleDateString() %></p>
+            </div>
+            <% if (user.subscription_status === 'active') { %>
+              <a href="/download/<%= tool.id %>" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Download</a>
+            <% } else { %>
+              <span class="text-gray-400">Subscribe to download</span>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <script>
+    document.getElementById('subscribeBtn')?.addEventListener('click', async () => {
+      const res = await fetch('/create-checkout-session', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) window.location = data.url;
+      else alert(data.error || 'Error creating checkout');
+    });
+  </script>
+</body>
+</html>

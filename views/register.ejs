@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Office Tools Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+    <h2 class="text-2xl font-bold mb-6 text-center">Create Account</h2>
+    <% if (error) { %>
+      <div class="bg-red-100 text-red-700 p-3 rounded mb-4"><%= error %></div>
+    <% } %>
+    <form method="POST" action="/register">
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Email</label>
+        <input type="email" name="email" required class="w-full border rounded px-3 py-2">
+      </div>
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-1">Password</label>
+        <input type="password" name="password" required minlength="6" class="w-full border rounded px-3 py-2">
+      </div>
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Register</button>
+    </form>
+    <p class="text-center mt-4 text-sm">Already have an account? <a href="/login" class="text-blue-600">Login</a></p>
+    <p class="text-center mt-2"><a href="/" class="text-gray-500 text-sm">← Back to home</a></p>
+  </div>
+</body>
+</html>

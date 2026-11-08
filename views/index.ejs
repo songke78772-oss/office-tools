@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Office Tools Pro - Professional Office Productivity Tools</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-600">Office Tools Pro</h1>
+      <div>
+        <% if (loggedIn) { %>
+          <a href="/dashboard" class="text-blue-600 hover:underline mr-4">Dashboard</a>
+          <a href="/logout" class="text-gray-600">Logout</a>
+        <% } else { %>
+          <a href="/login" class="text-gray-600 mr-4">Login</a>
+          <a href="/register" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Get Started</a>
+        <% } %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-4 py-16 text-center">
+    <h2 class="text-5xl font-bold text-gray-900 mb-6">Powerful Office Tools<br>for Professionals</h2>
+    <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+      Access a growing library of carefully crafted office productivity tools. 
+      One simple subscription. Continuous updates. Download and use instantly.
+    </p>
+    <div class="bg-white rounded-xl shadow-lg p-8 inline-block">
+      <div class="text-4xl font-bold text-blue-600 mb-2">$<%= price %><span class="text-lg text-gray-500">/month</span></div>
+      <p class="text-gray-600 mb-6">Cancel anytime. All tools included.</p>
+      <a href="/register" class="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 inline-block">
+        Start Your Subscription
+      </a>
+    </div>
+  </div>
+
+  <div class="bg-white py-16">
+    <div class="max-w-6xl mx-auto px-4">
+      <h3 class="text-3xl font-bold text-center mb-12">Why Office Tools Pro?</h3>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="text-4xl mb-4">⚡</div>
+          <h4 class="text-xl font-semibold mb-2">Instant Access</h4>
+          <p class="text-gray-600">Register, subscribe, and download tools immediately. No complicated setup.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">🔄</div>
+          <h4 class="text-xl font-semibold mb-2">Continuous Updates</h4>
+          <p class="text-gray-600">New tools and improvements added regularly. Your subscription always includes the latest.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">💼</div>
+          <h4 class="text-xl font-semibold mb-2">Built for Work</h4>
+          <p class="text-gray-600">Focused on real office productivity. Clean, useful, and practical tools.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="py-16 text-center">
+    <p class="text-gray-600 mb-4">Currently <strong><%= toolsCount %></strong> tools available. More coming soon.</p>
+    <a href="/register" class="text-blue-600 font-semibold hover:underline">Join now →</a>
+  </div>
+
+  <footer class="bg-gray-800 text-white py-8 text-center text-sm">
+    <p>Office Tools Pro &copy; 2026. Designed for professionals outside China.</p>
+  </footer>
+</body>
+</html>
