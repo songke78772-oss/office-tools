@@ -1,6 +1,9 @@
 {
   "name": "office-tools-pro",
   "version": "1.0.0",
+  "engines": {
+  "node": "20"
+  },
   "description": "SaaS platform for downloading office productivity tools with $1.99/month subscription",
   "main": "server.js",
   "scripts": {
