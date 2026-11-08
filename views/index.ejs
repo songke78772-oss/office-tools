@@ -37,14 +37,41 @@
     </div>
   </div>
 
+  <!-- Tools Section -->
   <div class="bg-white py-16">
+    <div class="max-w-6xl mx-auto px-4">
+      <h3 class="text-3xl font-bold text-center mb-12">Available Tools</h3>
+      <div class="grid md:grid-cols-3 gap-8">
+        <% if (tools && tools.length > 0) { %>
+          <% tools.forEach(tool => { %>
+            <div class="border rounded-lg p-6 text-center hover:shadow-lg transition">
+              <div class="text-5xl mb-4"><%= tool.type === 'online' ? '📄' : '🔧' %></div>
+              <h4 class="text-xl font-semibold mb-2"><%= tool.name %></h4>
+              <p class="text-gray-600 mb-4"><%= tool.description || '' %></p>
+              <% if (tool.type === 'online' && tool.url) { %>
+                <a href="<%= tool.url %>" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 inline-block">
+                  Use Tool
+                </a>
+              <% } else { %>
+                <span class="text-gray-500 text-sm">Available after login</span>
+              <% } %>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p class="text-center text-gray-500 col-span-3">No tools available yet.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-gray-50 py-16">
     <div class="max-w-6xl mx-auto px-4">
       <h3 class="text-3xl font-bold text-center mb-12">Why Office Tools Pro?</h3>
       <div class="grid md:grid-cols-3 gap-8">
         <div class="text-center">
           <div class="text-4xl mb-4">⚡</div>
           <h4 class="text-xl font-semibold mb-2">Instant Access</h4>
-          <p class="text-gray-600">Register, subscribe, and download tools immediately. No complicated setup.</p>
+          <p class="text-gray-600">Register, subscribe, and use tools immediately. No complicated setup.</p>
         </div>
         <div class="text-center">
           <div class="text-4xl mb-4">🔄</div>
@@ -61,7 +88,7 @@
   </div>
 
   <div class="py-16 text-center">
-    <p class="text-gray-600 mb-4">Currently <strong><%= toolsCount %></strong> tools available. More coming soon.</p>
+    <p class="text-gray-600 mb-4">More tools coming soon.</p>
     <a href="/register" class="text-blue-600 font-semibold hover:underline">Join now →</a>
   </div>
 
